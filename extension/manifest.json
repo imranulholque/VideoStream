@@ -1,0 +1,10 @@
+{
+  "manifest_version": 3,
+  "name": "Stream to PC",
+  "version": "1.0.0",
+  "description": "Detect video streams and subtitles on a page, play them in your PC player or download in best quality.",
+  "permissions": ["webRequest", "storage", "nativeMessaging", "tabs"],
+  "host_permissions": ["<all_urls>"],
+  "background": { "service_worker": "background.js" },
+  "action": { "default_popup": "popup.html", "default_title": "Stream to PC" }
+}

@@ -1,0 +1,16 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><link rel="stylesheet" href="popup.css"></head>
+<body>
+  <h1>Stream to PC</h1>
+  <div id="status"></div>
+  <h2>Videos</h2><div id="videos" class="list"></div>
+  <h2>Subtitles <small>(checked = used for play/download)</small></h2><div id="subs" class="list"></div>
+  <details><summary>Settings</summary>
+    <label>Player
+      <select id="player"><option value="mpv">mpv (recommended)</option><option value="vlc">VLC</option><option value="custom">Custom exe</option></select>
+    </label>
+    <label>Player path (optional)<input id="playerPath" placeholder="C:\Program Files\mpv\mpv.exe"></label>
+    <label>Download folder<input id="downloadDir" placeholder="default: Videos\StreamToPC"></label>
+  </details>
+  <script src="popup.js"></script>
+</body></html>

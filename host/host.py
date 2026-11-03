@@ -56,7 +56,35 @@ def spawn_detached(cmd, console=False):
                      stderr=None if console else subprocess.DEVNULL, close_fds=True)
 
 # ---------- play ----------
+def cookie_opts(m):
+    """yt-dlp option list for cookies (login / age-restricted)."""
+    if m.get("cookiesFile") and os.path.isfile(m["cookiesFile"]):
+        return ["--cookies", m["cookiesFile"]]
+    if m.get("cookiesBrowser"):
+        return ["--cookies-from-browser", "edge"]
+    return []
+
+def play_page(m):
+    exe = m.get("playerPath") if (m.get("player") or "mpv") == "mpv" and m.get("playerPath") else find_tool("mpv")
+    if (m.get("player") or "mpv") != "mpv":
+        return {"ok": False, "message": "Page URL play-er jonno Settings-e player 'mpv' select koro (VLC page URL bujhe na)."}
+    if not exe or not os.path.isfile(exe):
+        return {"ok": False, "message": "mpv not found. Install mpv or set the path in Settings."}
+    raw = ["write-subs=", "sub-langs=all"]
+    if m.get("cookiesFile") and os.path.isfile(m["cookiesFile"]):
+        raw.append("cookies=" + m["cookiesFile"])
+    elif m.get("cookiesBrowser"):
+        raw.append("cookies-from-browser=edge")
+    cmd = [exe, "--ytdl=yes", "--ytdl-format=bestvideo+bestaudio/best", "--ytdl-raw-options=" + ",".join(raw)]
+    yt = find_tool("yt-dlp")
+    if yt: cmd.append("--script-opts=ytdl_hook-ytdl_path=" + yt)
+    cmd += ["--", m["url"]]
+    spawn_detached(cmd)
+    return {"ok": True, "message": "Opened in mpv (yt-dlp diye extract hocche, ektu soman lagte pare)"}
+
 def play(m):
+    if m.get("mode") == "page":
+        return play_page(m)
     h = m.get("headers") or {}
     hd = req_headers(m, h)
     title = m.get("title") or "video"
@@ -111,21 +139,24 @@ def worker(jobfile):
         print("WARNING: ffmpeg not found (needed to merge video+audio). Install: winget install Gyan.FFmpeg")
     outdir = m.get("downloadDir") or os.path.join(os.path.expanduser("~"), "Videos", "StreamToPC")
     os.makedirs(outdir, exist_ok=True)
+    page = m.get("mode") == "page"
     title = sanitize(m.get("title"))
     pathfile = os.path.join(tempfile.gettempdir(), "stp_path_%s.txt" % uuid.uuid4().hex[:6])
     cmd = [ytdlp, m["url"], "--no-playlist", "-f", "bv*+ba/b", "--merge-output-format", "mkv",
            "--write-subs", "--sub-langs", "all,-live_chat", "--embed-subs",
            "--concurrent-fragments", "8", "--user-agent", hd["User-Agent"],
-           "-o", os.path.join(outdir, title + ".%(ext)s"),
+           "-o", os.path.join(outdir, ("%(title).150B [%(id)s]" if page else title) + ".%(ext)s"),
            "--print-to-file", "after_move:filepath", pathfile]
-    if "Referer" in hd: cmd += ["--referer", hd["Referer"]]
-    for k in ("Origin", "Cookie"):
-        if k in hd: cmd += ["--add-header", "%s:%s" % (k, hd[k])]
+    if not page:
+        if "Referer" in hd: cmd += ["--referer", hd["Referer"]]
+        for k in ("Origin", "Cookie"):
+            if k in hd: cmd += ["--add-header", "%s:%s" % (k, hd[k])]
+    cmd += cookie_opts(m)
     if ffmpeg: cmd += ["--ffmpeg-location", ffmpeg]
     print("Downloading best quality:", m["url"], "\n")
     rc = subprocess.call(cmd)
     # external subtitle files found on the page -> saved next to the video as .srt
-    for i, s in enumerate(m.get("subs") or []):
+    for i, s in enumerate([] if page else (m.get("subs") or [])):
         try:
             ext = os.path.splitext(s["url"].split("?")[0])[1] or ".vtt"
             base = os.path.join(outdir, "%s.%s" % (title, sanitize(s.get("label") or "sub%d" % (i + 1))))
@@ -137,7 +168,7 @@ def worker(jobfile):
             print("Subtitle saved:", base)
         except Exception as e:
             print("Subtitle failed:", e)
-    print("\nDONE" if rc == 0 else "\nyt-dlp exit code %d (DRM/expired link/login lagte pare)" % rc)
+    print("\nDONE" if rc == 0 else "\nyt-dlp exit code %d (DRM / expired link / login lagte pare). Try: yt-dlp -U  ar  winget install DenoLand.Deno (YouTube-er jonno)" % rc)
     print("Folder:", outdir)
     os.system("pause")
 

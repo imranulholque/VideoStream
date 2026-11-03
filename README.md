@@ -14,6 +14,12 @@ Popup theke: **Play** (mpv / VLC) ba **Download** (best resolution + subtitles, 
 Push to GitHub -> Actions `build` workflow `host.py` ke exe banay ar zip toiri kore. Tag `v1.0.0` push korle Release-e upload hoy.
 (Exe chara chalate chaile Python install thakle `install.ps1` `host.bat` diye kaj chalabe.)
 
+## Kon site-e kaj kore
+- **"This page" (Page URL):** YouTube, Vimeo, X/Twitter, Facebook, Twitch, Dailymotion, Reddit ... 1000+ site. yt-dlp nije video khuje ber kore, tai sniff lage na. Play = mpv, Download = best quality + subtitles (.mkv).
+- **"Detected streams":** onno jekono site-er direct m3u8/mpd/mp4 (yt-dlp na bujhle eta kaj kore).
+- Login/age-restricted video: Settings-e *Use Edge cookies* ba `cookies.txt` path dao. (Notun Edge-e cookie-DB encrypted/locked thakle `cookies.txt` beshi reliable.)
+- Site bodlale: `yt-dlp -U` chalao. YouTube-er jonno Deno lage (`winget install DenoLand.Deno`).
+
 ## Notes
 - DRM-protected stream (Netflix, Prime, Disney+ etc. - Widevine) kaj korbe na; ei tool DRM bypass kore na.
 - Page-er vitore subtitle HLS/DASH manifest-e thakle yt-dlp auto embed kore (mkv). Alada vtt/srt file thakle video-r pashe `.srt` hishebe save hoy.

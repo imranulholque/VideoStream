@@ -28,6 +28,6 @@ New-Item -Path 'HKCU:\Software\Microsoft\Edge\NativeMessagingHosts\com.streamtop
 Write-Host "Installed. Edge restart koro."
 
 if ($InstallDeps) {
-  foreach ($id in 'yt-dlp.yt-dlp','Gyan.FFmpeg','VideoLAN.VLC') { winget install --id $id -e --accept-package-agreements --accept-source-agreements }
+  foreach ($id in 'yt-dlp.yt-dlp','Gyan.FFmpeg','DenoLand.Deno','VideoLAN.VLC') { winget install --id $id -e --accept-package-agreements --accept-source-agreements }
   Write-Host "mpv chaile manually nao: https://mpv.io/installation/ (ba: winget search mpv)"
 }
